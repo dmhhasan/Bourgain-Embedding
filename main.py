@@ -5,6 +5,8 @@ import numpy as np
 
 parser = argparse.ArgumentParser("Bourgain embedding")
 parser.add_argument('--graph', type = str, default='uihc', help = 'Choose the graph for generating the embedding')
+parser.add_argument('--c', type = int, default=2, help="The 'c' value for Bourgain's algorithm")
+parser.add_argument('--unweighted', type = bool, default=True, help ="Use or not edge weight for computing the embedding")
 # Remote sql data
 parser.add_argument('--host', type=str, default='localhost')
 parser.add_argument('--username', type = str, default='')
@@ -15,12 +17,10 @@ args = parser.parse_args()
 
 if __name__=="__main__":
     adj, node_mapping, index_mapping = load_graph(args)
-    print(adj.toarray())
     dist_mat = get_shortest_path_distances(args, adj)
-    print(dist_mat)
 
     # Apply Bourgain's embedding algorithm
-    c = 2
+    c = args.c
     n = adj.shape[0]
     j_max = math.floor(np.log(n))
     i_max = c*j_max
@@ -56,8 +56,7 @@ if __name__=="__main__":
     Path("output/").mkdir(parents=True, exist_ok=True)
     np.savez("output/"+args.graph+"_embedding.npz", embedding = emb, node_mapping = node_mapping, index_mapping = index_mapping)
     
-    print(emb)
-    print(emb.shape)
+    print("Embedding shape:",emb.shape)
 
 
 

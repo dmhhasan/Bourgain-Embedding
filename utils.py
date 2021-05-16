@@ -18,7 +18,7 @@ def load_graph(args):
 def generate_graph(args):
     server = initialize_server(args)
 
-    if args.graph == 'uihc':
+    if args.graph == 'room':
         df = get_sql_data(server, "select srid, drid,cost from edges")
         df.dropna(inplace=True)
         # Minimum edge weight: 0.8 and maximum edge weigth = 5
@@ -91,14 +91,7 @@ def generate_graph(args):
 
 
 def get_shortest_path_distances(args, adj):
-    file = Path("dist_matrix/"+args.graph+"_dist_mat.npz")
-    if file.is_file():
-        return np.load(file)['dist_mat']
-    else:
-        # Make sure the graph is undirected i.e. the matrix is symmetric
-        adj = adj + adj.T.multiply(adj.T > adj) - adj.multiply(adj.T > adj)
-        dist_mat = sp.csgraph.shortest_path(csgraph = adj, directed = False, return_predecessors = False, unweighted = True)
-        # Save distanc matrix
-        Path("dist_matrix/").mkdir(parents=True, exist_ok=True)
-        np.savez("dist_matrix/"+args.graph+"_dist_mat.npz", dist_mat = dist_mat)
-        return dist_mat
+    # Make sure the graph is undirected i.e. the matrix is symmetric
+    adj = adj + adj.T.multiply(adj.T > adj) - adj.multiply(adj.T > adj)
+    dist_mat = sp.csgraph.shortest_path(csgraph = adj, directed = False, return_predecessors = False, unweighted = args.unweighted)
+    return dist_mat
